@@ -17,9 +17,16 @@ const innerStackTokens: IStackTokens = {
 const stackStyles: IStackStyles = {
   root: {
     background: DefaultPalette.themeTertiary,
-    height: 250,
+    height: 340,
   },
 };
+
+const innerStackStyles: IStackStyles = {
+  root: {
+    background: DefaultPalette.themeTertiary,
+  },
+};
+
 const stackItemStyles: IStackItemStyles = {
   root: {
     alignItems: 'center',
@@ -35,9 +42,8 @@ const innerStackItemStyles: IStackItemStyles = {
     display: 'flex',
     justifyContent: 'center',
     flexFlow: 'column',
-    border: "1px",
-    borderStyle: "solid",
-    borderColor: DefaultPalette.blackTranslucent40
+    borderBottom: `1px solid ${DefaultPalette.blueDark}`,
+    paddingBottom: "2%"
   }
 };
 
@@ -98,7 +104,7 @@ function App(props: any) {
             <Canvas draw={draw} />
           </Stack.Item>
           <Stack.Item grow styles={stackItemStyles}>
-            <Stack horizontal styles={stackStyles} tokens={customSpacingStackTokens}>
+            <Stack styles={innerStackStyles} tokens={customSpacingStackTokens}>
               <Stack.Item grow styles={innerStackItemStyles}>
                 <h3>Humidity Sensor Value: </h3>
                 <SpinButton
