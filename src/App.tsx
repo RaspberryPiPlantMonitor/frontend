@@ -36,8 +36,9 @@ const innerStackItemStyles: IStackItemStyles = {
     justifyContent: 'center',
     flexFlow: 'column',
     border: "1px",
-    borderStyle: "solid"
-  },
+    borderStyle: "solid",
+    borderColor: DefaultPalette.blackTranslucent40
+  }
 };
 
 
