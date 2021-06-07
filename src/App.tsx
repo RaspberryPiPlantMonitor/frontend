@@ -1,9 +1,10 @@
+import React, { useState, useEffect } from 'react';
 import { Stack, IStackStyles, IStackTokens, IStackItemStyles } from '@fluentui/react/lib/Stack';
 import { DefaultPalette } from '@fluentui/react/lib/Styling';
 import { DefaultButton } from '@fluentui/react/lib/Button';
 import { SpinButton, ISpinButtonStyles } from '@fluentui/react/lib/SpinButton';
 import Canvas from './Canvas';
-import plantImage from './assets/plant2.png'
+import plantImage from './assets/plant.png'
 import './App.css';
 
 // Tokens definition
@@ -66,8 +67,19 @@ const spinButtonStyles: Partial<ISpinButtonStyles> = {
   },
 };
 
+const cameraImage = new Image() 
+
 function App(props: any) {
-  const camera_img = props.camera_img;
+  const websocket = props.websocket;
+  const [humiditySensor, setHumiditySensor] = useState("");
+
+  useEffect(() => {
+    websocket.onmessage = function (message: any) {
+      // Check if socket is sending camera image
+      if (message.data.startsWith("data:image")) cameraImage.src = message.data;
+      else setHumiditySensor(message.data);
+    };
+  }, [websocket]);
 
   const draw = (canvas: any) => {
     const context = canvas.getContext("2d");
@@ -75,16 +87,16 @@ function App(props: any) {
     context.fillStyle = "white";
     context.textAlign = "center";
 
-    camera_img.onload = function () {
-      canvas.width = camera_img.width
-      canvas.height = camera_img.height
-      context.drawImage(camera_img, 0, 0, camera_img.width, camera_img.height);
+    cameraImage.onload = function () {
+      canvas.width = cameraImage.width
+      canvas.height = cameraImage.height
+      context.drawImage(cameraImage, 0, 0, cameraImage.width, cameraImage.height);
     };
 
-    camera_img.onerror = function () {
+    cameraImage.onerror = function () {
       context.fillText("Video failed to load!", canvas.width/2, canvas.height/2);
     }
-    if (camera_img.src === "") {
+    if (cameraImage.src === "") {
       context.fillText("Loading video...", canvas.width/2, canvas.height/2);
     }
   }
@@ -106,7 +118,7 @@ function App(props: any) {
           <Stack.Item grow styles={stackItemStyles}>
             <Stack styles={innerStackStyles} tokens={customSpacingStackTokens}>
               <Stack.Item grow styles={innerStackItemStyles}>
-                <h3>Humidity Sensor Value: </h3>
+                <h3>Humidity Sensor Value: <h2>{humiditySensor}</h2></h3>
                 <SpinButton
                   label="Run pump when humidity equals to:"
                   defaultValue="0"
