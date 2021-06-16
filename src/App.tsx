@@ -101,6 +101,11 @@ function App(props: any) {
     }
   }
 
+  // Do not render page if sensor data is not ready
+  if (humiditySensor === "") {
+    return <span></span>
+  } 
+
   return (
     <div className="App">
       <Stack tokens={outerStackTokens}>
