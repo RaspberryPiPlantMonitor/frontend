@@ -22,7 +22,7 @@ const stackStyles: Partial<IStackStyles> = {
 const plantImageStyle: any = {
     position: "absolute",
     left: "50%",
-    transform: "translate(-50%, -50%)"
+    transform: "translate(-50%, -100%)"
 }
 
 function Login(props: any) {

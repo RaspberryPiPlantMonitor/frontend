@@ -5,6 +5,8 @@ import { DefaultPalette } from '@fluentui/react/lib/Styling';
 import { DefaultButton } from '@fluentui/react/lib/Button';
 import { ProgressIndicator, IProgressIndicatorStyles  } from '@fluentui/react/lib/ProgressIndicator';
 import { SpinButton, ISpinButtonStyles } from '@fluentui/react/lib/SpinButton';
+import { Label } from '@fluentui/react/lib/Label';
+import { Toggle, IToggleStyles } from '@fluentui/react/lib/Toggle';
 import Canvas from './Canvas';
 import plantImage from './assets/plant.png'
 import './App.css'; 
@@ -26,7 +28,8 @@ const stackStyles: IStackStyles = {
 
 const innerStackStyles: IStackStyles = {
   root: {
-    background: DefaultPalette.themeTertiary,
+    background: DefaultPalette.white,
+    border: `1px solid ${DefaultPalette.blackTranslucent40}`,
   },
 };
 
@@ -45,8 +48,9 @@ const innerStackItemStyles: IStackItemStyles = {
     display: 'flex',
     justifyContent: 'center',
     flexFlow: 'column',
-    borderBottom: `1px solid ${DefaultPalette.blueDark}`,
-    paddingBottom: "2%"
+    borderBottom: `1px solid ${DefaultPalette.blackTranslucent40}`,
+    paddingBottom: "3%",
+    paddingTop: "3%"
   }
 };
 
@@ -63,10 +67,7 @@ const plantImageStyle = {
 const spinButtonStyles: Partial<ISpinButtonStyles> = { 
   arrowButtonsContainer: {
     background: DefaultPalette.white,
-  },
-  label: {
-    color: DefaultPalette.blueDark,
-  },
+  }
 };
 
 const loadingStackStyles: Partial<IStackStyles> = { 
@@ -100,9 +101,16 @@ const progressIndicatorStyles: IProgressIndicatorStyles = {
   root: {}
 }
 
+const toggleSyles: any = { 
+  container : { 
+    alignItems: "center",
+    justifyContent: "center"
+  }
+}; 
+
 const cameraImage = new Image() 
 
-const HOST = window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080" 
+const HOST = window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
 
 axios.defaults.baseURL = `https://${HOST}`;
 
@@ -192,7 +200,9 @@ function App(props: any) {
           <Stack.Item grow styles={stackItemStyles}>
             <Stack styles={innerStackStyles} tokens={customSpacingStackTokens}>
               <Stack.Item grow styles={innerStackItemStyles}>
-                <h3>Humidity Sensor Value:</h3><h2>{humiditySensor}</h2>
+                <Label>Humidity Sensor Reading: <h2>{humiditySensor}</h2></Label>
+              </Stack.Item>
+              <Stack.Item grow styles={innerStackItemStyles}>
                 <SpinButton
                   label="Run pump when humidity greater than:"
                   value={humiditySensorLimit}
@@ -212,21 +222,18 @@ function App(props: any) {
                 }}/>
               </Stack.Item>
               <Stack.Item grow styles={innerStackItemStyles}>
-                <h3>Light Status:</h3><h2>{lightStatus === 0 ? "Off" : "On"}</h2>
-                <DefaultButton text={`Turn light ${lightStatus === 0 ? "on" : "off" }`} onClick={async () => {
+                <Toggle label="Light Switch" checked={lightStatus === 1} styles={toggleSyles} onText="On" offText="Off" onChange={async () => {
                   await axios.post(`/lightRelay?password=${password}`, {
                     Value: lightStatus === 0 ? "on" : "off"
-                  });
-                }} />  
+                  })
+                }} /> 
               </Stack.Item>
               <Stack.Item grow styles={innerStackItemStyles}>
-                <h3>Water Pump Status:</h3><h2>{pumpStatus === 0 ? "Off" : "On"}</h2>
-                {pumpStatus === 0 ? 
-                  <DefaultButton text={`Turn pump ${pumpStatus === 0 ? "on" : "off"}`} onClick={() => {
-                    
-                  }} allowDisabledFocus /> 
-                  : <span/>}
-                             
+                <Toggle label="Water Pump Switch" checked={pumpStatus === 1} styles={toggleSyles} onText="On" offText="Off" onChange={async () => {
+                  await axios.post(`/lightRelay?password=${password}`, {
+                    Value: lightStatus === 0 ? "on" : "off"
+                  })
+                }} /> 
               </Stack.Item>
             </Stack>
           </Stack.Item>
