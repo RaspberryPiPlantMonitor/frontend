@@ -102,8 +102,7 @@ const progressIndicatorStyles: IProgressIndicatorStyles = {
 
 const cameraImage = new Image() 
 
-// http://8.tcp.ngrok.io:19301/
-const HOST = window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080" //window.location.host
+const HOST = window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080" 
 
 axios.defaults.baseURL = `https://${HOST}`;
 
