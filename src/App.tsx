@@ -110,9 +110,10 @@ const toggleSyles: any = {
 
 const cameraImage = new Image() 
 
+const TLS = true
 const HOST = window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
 
-axios.defaults.baseURL = `https://${HOST}`;
+axios.defaults.baseURL = `${TLS ? "https" : "http"}://${HOST}`;
 
 function App(props: any) {
   const password = props.password;
@@ -123,7 +124,7 @@ function App(props: any) {
   const [pumpStatus, setPumpStatus] = useState();
 
   useEffect(() => {
-    const websocket = new WebSocket(`wss://${HOST}/realtime?password=${password}`); 
+    const websocket = new WebSocket(`${TLS ? "wss" : "ws"}://${HOST}/realtime?password=${password}`); 
     websocket.onopen = function () {
       console.log("Websocket connection established");
     };
