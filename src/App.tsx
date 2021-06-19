@@ -3,10 +3,11 @@ import axios from "axios";
 import { Stack, IStackStyles, IStackTokens, IStackItemStyles } from '@fluentui/react/lib/Stack';
 import { DefaultPalette } from '@fluentui/react/lib/Styling';
 import { DefaultButton } from '@fluentui/react/lib/Button';
+import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { ProgressIndicator, IProgressIndicatorStyles  } from '@fluentui/react/lib/ProgressIndicator';
 import { SpinButton, ISpinButtonStyles } from '@fluentui/react/lib/SpinButton';
 import { Label } from '@fluentui/react/lib/Label';
-import { Toggle, IToggleStyles } from '@fluentui/react/lib/Toggle';
+import { Toggle } from '@fluentui/react/lib/Toggle';
 import Canvas from './Canvas';
 import plantImage from './assets/plant.png'
 import './App.css'; 
@@ -38,11 +39,12 @@ const stackItemStyles: IStackItemStyles = {
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'center',
-    flexFlow: 'column'
+    flexFlow: 'column',
+    marginBottom: "5px"
   },
 };
 
-const innerStackItemStyles: IStackItemStyles = {
+const innerStackItemStyles: any = {
   root: {
     alignItems: 'center',
     display: 'flex',
@@ -110,18 +112,23 @@ const toggleSyles: any = {
 
 const cameraImage = new Image() 
 
-const TLS = true
-const HOST = window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
+const TLS = false
+const HOST = "10.88.111.26:8080" //window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
 
 axios.defaults.baseURL = `${TLS ? "https" : "http"}://${HOST}`;
+axios.defaults.withCredentials = true;
 
 function App(props: any) {
   const password = props.password;
+  axios.defaults.headers.common['Authorization'] = password
+
   const [humiditySensor, setHumiditySensor] = useState("");
   const [humiditySensorLimit, setHumiditySensorLimit] = useState("0");
 
-  const [lightStatus, setLightStatus] = useState();
-  const [pumpStatus, setPumpStatus] = useState();
+  const [lightStatus, setLightStatus] = useState(0);
+  const [pumpStatus, setPumpStatus] = useState(0);
+  const [loadingLight, setLoadingLight] = useState(false);
+  const [loadingPump, setLoadingPump] = useState(false);
 
   useEffect(() => {
     const websocket = new WebSocket(`${TLS ? "wss" : "ws"}://${HOST}/realtime?password=${password}`); 
@@ -135,27 +142,26 @@ function App(props: any) {
     };
 
     websocket.onmessage = function (message: any) {
-      
       // Check if socket is sending camera image
-      if (message.data.startsWith("data:image")) cameraImage.src = message.data;
-      else {
+      if (message.data.startsWith("data:image")) {
+        cameraImage.src = message.data;
+      } else {
         try {
           const data = JSON.parse(message.data);
           setHumiditySensor(data.humidityValue);
           setLightStatus(data.lightValue);
           setPumpStatus(data.pumpValue);
-        } catch(e) {
-        }
+        } catch(e) {}
       }
     };
 
-    axios.get(`/humiditySensorLimit?password=${password}`).then(response => {
+    axios.get(`/humiditySensorLimit`).then(response => {
       setHumiditySensorLimit(response.data.value)
     })
 
   }, [password]);
 
-  const draw = (canvas: any) => {
+  const drawCanvas = (canvas: any) => {
     const context = canvas.getContext("2d");
     context.font = "20px Arial";
     context.fillStyle = "white";
@@ -196,7 +202,7 @@ function App(props: any) {
             </h1>
           </Stack.Item>
           <Stack.Item grow styles={stackItemStyles}>
-            <Canvas draw={draw} />
+            <Canvas draw={drawCanvas} />
           </Stack.Item>
           <Stack.Item grow styles={stackItemStyles}>
             <Stack styles={innerStackStyles} tokens={customSpacingStackTokens}>
@@ -216,25 +222,45 @@ function App(props: any) {
                 />
                 <br/>
                 <DefaultButton text="Save" onClick={async () => {
-                  await axios.post(`/humiditySensorLimit?password=${password}`, {
+                  await axios.post(`/humiditySensorLimit`, {
                     Value: Number(humiditySensorLimit)
                   });
                   alert("Saved!")
                 }}/>
               </Stack.Item>
               <Stack.Item grow styles={innerStackItemStyles}>
-                <Toggle label="Light Switch" checked={lightStatus === 1} styles={toggleSyles} onText="On" offText="Off" onChange={async () => {
-                  await axios.post(`/lightRelay?password=${password}`, {
-                    Value: lightStatus === 0 ? "on" : "off"
-                  })
-                }} /> 
+                {loadingLight ?
+                  <>
+                    <Label>Updating Light Switch</Label>
+                    <Spinner size={SpinnerSize.large} />
+                  </> :
+                  <Toggle label="Light Switch" checked={lightStatus === 1} styles={toggleSyles} onText="On" offText="Off" onChange={async () => {
+                    setLoadingLight(true)
+                    try {
+                      await axios.post(`/lightRelay`, { Value: lightStatus === 0 ? "on" : "off"})
+                    } catch(e) {
+                      console.log(e)
+                    }
+                    setLoadingLight(false)
+                  }} /> 
+                }
               </Stack.Item>
-              <Stack.Item grow styles={innerStackItemStyles}>
-                <Toggle label="Water Pump Switch" checked={pumpStatus === 1} styles={toggleSyles} onText="On" offText="Off" onChange={async () => {
-                  await axios.post(`/lightRelay?password=${password}`, {
-                    Value: lightStatus === 0 ? "on" : "off"
-                  })
-                }} /> 
+              <Stack.Item grow styles={{root: {...innerStackItemStyles.root, borderBottom: 0}}}>
+                {loadingPump ?
+                    <>
+                      <Label>Updating Water Pump Switch</Label>
+                      <Spinner size={SpinnerSize.large} />
+                    </> :
+                  <Toggle label="Water Pump Switch" checked={pumpStatus === 1} styles={toggleSyles} onText="On" offText="Off" onChange={async () => {
+                    setLoadingPump(true)
+                    try {
+                      await axios.post(`/pumpRelay`, { Value: pumpStatus === 0 ? "on" : "off"})
+                    } catch(e) {
+                      console.log(e)
+                    }
+                    setLoadingPump(false)
+                  }} /> 
+                }
               </Stack.Item>
             </Stack>
           </Stack.Item>
