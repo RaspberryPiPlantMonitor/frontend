@@ -112,7 +112,7 @@ const toggleSyles: any = {
 
 const cameraImage = new Image() 
 
-const TLS = false
+const TLS = true
 const HOST = "10.88.111.26:8080" //window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
 
 axios.defaults.baseURL = `${TLS ? "https" : "http"}://${HOST}`;
