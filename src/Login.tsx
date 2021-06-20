@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Stack, IStackTokens, IStackStyles } from '@fluentui/react/lib/Stack';
+import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import { TextField } from '@fluentui/react/lib/TextField';
 import { PrimaryButton } from '@fluentui/react/lib/Button';
 import plantImage from './assets/plant.png'
@@ -40,11 +41,29 @@ function Login(props: any) {
         return childrenWithProps
     }
 
+    const handleKeypress = (e: any) => {
+        if (e.charCode === 13 || e.key === "Enter" || e.code === "Enter") {
+            setLoggedIn(true)
+        }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const failedParam = urlParams.get('failed');
+
     return (
         <div className="Login">
+            {failedParam === "true" ?
+            <MessageBar
+                messageBarType={MessageBarType.error}
+                isMultiline={false}
+                dismissButtonAriaLabel="Close"
+            >
+                Incorrect magic word, try again :(
+            </MessageBar>
+            : <span/>}
             <Stack tokens={stackTokens} styles={stackStyles}>
                 <span style={plantImageStyle}>
-                    <img src={plantImage} style={{width: "200px"}} alt="Plant Monitor" />
+                    <img src={plantImage} style={{width: "150px"}} alt="Plant Monitor" />
                 </span>
                 <TextField
                     label="Tell me the magic word ;)"
@@ -54,6 +73,7 @@ function Login(props: any) {
                         const newPassword = newValue || ""
                         setPassword(newPassword)
                     }}
+                    onKeyPress={handleKeypress}
                     canRevealPassword
                     revealPasswordAriaLabel="Show password"
                 />

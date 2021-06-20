@@ -112,8 +112,8 @@ const toggleSyles: any = {
 
 const cameraImage = new Image() 
 
-const TLS = true
-const HOST = window.location.host // "10.88.111.26:8080" //window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
+const TLS = process.env.REACT_APP_TLS === "true";
+const HOST = "10.88.111.26:8080" //window.location.host //window.location.host //"1e59fe277944.ngrok.io" // "10.88.111.26:8080"
 
 axios.defaults.baseURL = `${TLS ? "https" : "http"}://${HOST}`;
 axios.defaults.withCredentials = true;
@@ -138,7 +138,7 @@ function App(props: any) {
   
     websocket.onclose = function () {
       console.log("Websocket disconnected");
-      window.location.reload();
+      window.location.replace(`${window.location.pathname}?failed=true`);
     };
 
     websocket.onmessage = function (message: any) {
