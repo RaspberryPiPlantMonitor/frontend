@@ -123,7 +123,7 @@ function App(props: any) {
   axios.defaults.headers.common['Authorization'] = password
 
   const [humiditySensor, setHumiditySensor] = useState("");
-  const [humiditySensorLimit, setHumiditySensorLimit] = useState("0");
+  const [humiditySensorMin, setHumiditySensorMin] = useState("0");
 
   const [lightStatus, setLightStatus] = useState(0);
   const [pumpStatus, setPumpStatus] = useState(0);
@@ -155,8 +155,8 @@ function App(props: any) {
       }
     };
 
-    axios.get(`/humiditySensorLimit`).then(response => {
-      setHumiditySensorLimit(response.data.value)
+    axios.get(`/humiditySensorMin`).then(response => {
+      setHumiditySensorMin(response.data.value)
     })
 
   }, [password]);
@@ -211,9 +211,9 @@ function App(props: any) {
               </Stack.Item>
               <Stack.Item grow styles={innerStackItemStyles}>
                 <SpinButton
-                  label="Run pump when humidity greater than:"
-                  value={humiditySensorLimit}
-                  onChange={(_, newValue) => { setHumiditySensorLimit(newValue || "")}}
+                  label="Run pump when humidity lower than:"
+                  value={humiditySensorMin}
+                  onChange={(_, newValue) => { setHumiditySensorMin(newValue || "")}}
                   min={0}
                   step={1}
                   incrementButtonAriaLabel="Increase value by 1"
@@ -222,8 +222,8 @@ function App(props: any) {
                 />
                 <br/>
                 <DefaultButton text="Save" onClick={async () => {
-                  await axios.post(`/humiditySensorLimit`, {
-                    Value: Number(humiditySensorLimit)
+                  await axios.post(`/humiditySensorMin`, {
+                    Value: Number(humiditySensorMin)
                   });
                   alert("Saved!")
                 }}/>
