@@ -216,7 +216,7 @@ function App(props: any) {
             <Stack styles={innerStackStyles} tokens={customSpacingStackTokens}>
               <Stack.Item grow styles={innerStackItemStyles}>
                 <TooltipHost
-                  content="Value ranges from 250 (wet) to 520 (dry)"
+                  content="Value ranges from 250 (wet) to 650 (dry)"
                   // Give the user more time to interact with the tooltip before it closes
                   closeDelay={500}
                   id={tooltipId}
