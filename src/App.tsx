@@ -6,8 +6,10 @@ import { DefaultButton } from '@fluentui/react/lib/Button';
 import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { ProgressIndicator, IProgressIndicatorStyles  } from '@fluentui/react/lib/ProgressIndicator';
 import { SpinButton, ISpinButtonStyles } from '@fluentui/react/lib/SpinButton';
+import { TooltipHost, ITooltipHostStyles } from '@fluentui/react/lib/Tooltip';
 import { Label } from '@fluentui/react/lib/Label';
 import { Toggle } from '@fluentui/react/lib/Toggle';
+import { useId } from '@fluentui/react-hooks';
 import Canvas from './Canvas';
 import plantImage from './assets/plant.png'
 import './App.css'; 
@@ -55,7 +57,6 @@ const innerStackItemStyles: any = {
     paddingTop: "3%"
   }
 };
-
 
 const customSpacingStackTokens: IStackTokens = {
   childrenGap: '1%',
@@ -110,6 +111,9 @@ const toggleSyles: any = {
   }
 }; 
 
+const tooltipStyles: Partial<ITooltipHostStyles> = { root: { display: 'inline-block' } };
+const calloutProps = { gapSpace: 0 };
+
 const cameraImage = new Image() 
 
 const TLS = process.env.REACT_APP_TLS === "true";
@@ -121,6 +125,10 @@ axios.defaults.withCredentials = true;
 function App(props: any) {
   const password = props.password;
   axios.defaults.headers.common['Authorization'] = password
+  
+  // Use useId() to ensure that the ID is unique on the page.
+  // (It's also okay to use a plain string and manually ensure uniqueness.)
+  const tooltipId = useId('tooltip');
 
   const [humiditySensor, setHumiditySensor] = useState("");
   const [humiditySensorMin, setHumiditySensorMin] = useState("0");
@@ -207,11 +215,20 @@ function App(props: any) {
           <Stack.Item grow styles={stackItemStyles}>
             <Stack styles={innerStackStyles} tokens={customSpacingStackTokens}>
               <Stack.Item grow styles={innerStackItemStyles}>
-                <Label>Humidity Sensor Reading: <h2>{humiditySensor}</h2></Label>
+                <TooltipHost
+                  content="Value ranges from 250 (wet) to 520 (dry)"
+                  // Give the user more time to interact with the tooltip before it closes
+                  closeDelay={500}
+                  id={tooltipId}
+                  calloutProps={calloutProps}
+                  styles={tooltipStyles}
+                >
+                  <Label aria-describedby={tooltipId}>Humidity Sensor Reading: <h2>{humiditySensor}</h2></Label>
+                </TooltipHost>
               </Stack.Item>
               <Stack.Item grow styles={innerStackItemStyles}>
                 <SpinButton
-                  label="Run pump when humidity lower than:"
+                  label="Run pump when humidity greater than:"
                   value={humiditySensorMin}
                   onChange={(_, newValue) => { setHumiditySensorMin(newValue || "")}}
                   min={0}
